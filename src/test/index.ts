@@ -14,6 +14,18 @@ class User extends Model {
     }
 }
 
+const adult = await User.filter(
+    ({age}: any) => age > 18
+);
+
+console.log(adult);
+
+const minor = await User.filter(
+    ({age}: any) => age < 18
+);
+
+console.log(minor);
+
 const user = new User().init({
     email: 'hjkareus@gmail.com',
     age: 19,
