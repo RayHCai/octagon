@@ -163,6 +163,40 @@ export default class Model {
         
         return models;
     }
+
+    async delete() {
+        const modelName = this.constructor.name;
+
+        const client = new pg.Client(clientConfig);
+        await client.connect();
+
+        await client.query(
+            `DELETE FROM ${pg.escapeIdentifier(
+                modelName.toLowerCase()
+            )} WHERE id = ${this.id}`
+        );
+
+        await client.end();
+    }
+
+    async update(obj: any) {
+        const modelName = this.constructor.name;
+        const fields = await this._getFields();
+        for(let k in obj) {
+            if(!fields.includes(k)) throw Error('Error. Only fields in the model can be updated.');
+        }
+
+        const client = new pg.Client(clientConfig);
+        await client.connect();
+
+        this._setFieldsFromObj(obj);
+
+        await client.query(
+            updateRow.bind(this)(modelName, fields, `id = ${this.id}`)
+        );
+
+        await client.end();
+    }
 }
 
 export function IntegerField(config: FieldConfig = null) {
