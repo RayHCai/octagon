@@ -14,17 +14,7 @@ class User extends Model {
     }
 }
 
-const adult = await User.filter(
-    ({age}: any) => age > 18
-);
-
-console.log(adult);
-
-const minor = await User.filter(
-    ({age}: any) => age < 18
-);
-
-console.log(minor);
+//! Model Creation
 
 const user = new User().init({
     email: 'hjkareus@gmail.com',
@@ -51,11 +41,33 @@ const user3 = new User().init({
 user3.greet();
 await user3.save();
 
+const user4 = new User().init({
+    name: 'Young',
+    email: 'young@test.com',
+    age: 12,
+});
+
+user4.greet();
+await user4.save();
+
+const user5 = new User().init({
+    name: 'Minor',
+    email: 'minor@test.com',
+    age: 15,
+});
+
+user5.greet();
+await user5.save();
+
+//! Basic Filtering
+
 const usersThatAre19 = await User.filter({
     age: 19,
 });
 
 console.log(usersThatAre19.length);
+
+//! Updating a Row
 
 const doug = (
     await User.filter({
@@ -67,3 +79,17 @@ doug.age = 22;
 await doug.save();
 
 doug.greet();
+
+//! Advanced Filtering
+
+const adult = await User.filter(
+    ({age}: any) => age >= 18
+);
+
+console.log(adult.length);
+
+const minor = await User.filter(
+    ({age}: any) => age < 18
+);
+
+console.log(minor.length);
