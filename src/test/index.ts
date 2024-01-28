@@ -67,7 +67,13 @@ const usersThatAre19 = await User.filter({
 
 console.log(usersThatAre19.length);
 
-//! Updating a Row
+await user.delete();
+
+console.log((await User.filter({
+    age: 19,
+})).length)
+
+// //! Updating a Row
 
 const doug = (
     await User.filter({
@@ -75,21 +81,25 @@ const doug = (
     })
 )[0];
 
-doug.age = 22;
-await doug.save();
+await doug.update({
+    age: 22
+});
+
+// doug.age = 22;
+// await doug.save();
 
 doug.greet();
 
-//! Advanced Filtering
+// //! Advanced Filtering
 
-const adult = await User.filter(
-    ({age}: any) => age >= 18
-);
+// const adult = await User.filter(
+//     ({age}: any) => age >= 18
+// );
 
-console.log(adult.length);
+// console.log(adult.length);
 
-const minor = await User.filter(
-    ({age}: any) => age < 18
-);
+// const minor = await User.filter(
+//     ({age}: any) => age < 18
+// );
 
-console.log(minor.length);
+// console.log(minor.length);
