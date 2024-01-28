@@ -109,42 +109,58 @@ export default class Model {
         await client.end();
     }
 
-    static async filter(filterObject: any) {
+    static async filter(filterObject: any = null) {
         const modelName = this.name;
 
         const client = new pg.Client(clientConfig);
         await client.connect();
 
-        const fields = (
-            await client.query(
-                `SELECT * FROM ${pg.escapeIdentifier(modelName.toLowerCase())}`
-            )
-        ).fields.map((f) => f.name);
+        let models: any;
 
-        for (const k in filterObject) {
-            if (!fields.includes(k))
-                throw Error(
-                    'Error. Only fields in the model can be filtered on.'
-                );
+        if(typeof filterObject === 'function') {
+            const callback = filterObject;
+
+            const allRows = (await client.query(
+                `SELECT * FROM ${pg.escapeIdentifier(modelName.toLowerCase())}`
+            )).rows;
+            
+            const filtered = allRows.filter(callback);
+            models = filtered.map((row: any) =>
+                new this()._setFieldsFromObj(row)
+            );
+        }
+        else {
+            const fields = (
+                await client.query(
+                    `SELECT * FROM ${pg.escapeIdentifier(modelName.toLowerCase())}`
+                )
+            ).fields.map((f) => f.name);
+
+            for (const k in filterObject) {
+                if (!fields.includes(k))
+                    throw Error(
+                        'Error. Only fields in the model can be filtered on.'
+                    );
+            }
+
+            const query = `SELECT * FROM ${pg.escapeIdentifier(
+                modelName.toLowerCase()
+            )} WHERE ${Object.keys(filterObject).map((property) => {
+                const filter = filterObject[property];
+                if (typeof filter === 'string') return `${property} = '${filter}'`;
+
+                return `${property} = ${filter}`;
+            })}`;
+
+            const res = await client.query(query);
+
+            models = res.rows.map((row: any) =>
+                new this()._setFieldsFromObj(row)
+            );
         }
 
-        const query = `SELECT * FROM ${pg.escapeIdentifier(
-            modelName.toLowerCase()
-        )} WHERE ${Object.keys(filterObject).map((property) => {
-            const filter = filterObject[property];
-            if (typeof filter === 'string') return `${property} = '${filter}'`;
-
-            return `${property} = ${filter}`;
-        })}`;
-
-        const res = await client.query(query);
-
-        const models: any = res.rows.map((row: any) =>
-            new this()._setFieldsFromObj(row)
-        );
-
         await client.end();
-
+        
         return models;
     }
 }
