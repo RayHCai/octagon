@@ -1,0 +1,18 @@
+{
+    "name": "orm",
+    "version": "1.0.0",
+    "main": "index.js",
+    "author": "Ray Cai Flanagan <hjkareus@gmail.com>",
+    "license": "MIT",
+    "dependencies": {
+        "acorn": "^8.11.3",
+        "acorn-walk": "^8.3.2",
+        "dotenv": "^16.4.1",
+        "pg": "^8.11.3"
+    },
+    "type": "module",
+    "devDependencies": {
+        "@types/node": "^20.11.8",
+        "@types/pg": "^8.11.0"
+    }
+}
