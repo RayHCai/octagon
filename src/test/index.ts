@@ -85,21 +85,18 @@ await doug.update({
     age: 22
 });
 
-// doug.age = 22;
-// await doug.save();
-
 doug.greet();
 
 // //! Advanced Filtering
 
-// const adult = await User.filter(
-//     ({age}: any) => age >= 18
-// );
+const adult = await User.filter(
+    ({age}: any) => age >= 18
+);
 
-// console.log(adult.length);
+console.log(adult.length);
 
-// const minor = await User.filter(
-//     ({age}: any) => age < 18
-// );
+const minor = await User.filter(
+    ({age}: any) => age < 18
+);
 
-// console.log(minor.length);
+console.log(minor.length);
