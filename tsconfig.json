@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "outDir": "lib",
+        "target": "ESNext",
+        "lib": ["es2019", "dom", "esnext"],
+        "allowJs": true,
+        "skipLibCheck": true,
+        "strict": true,
+        "noImplicitAny": true,
+        "forceConsistentCasingInFileNames": true,
+        "preserveConstEnums": true,
+        "esModuleInterop": true,
+        "module": "ESNext",
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "typeRoots": ["./node_modules/@types"],
+        "downlevelIteration": true,
+        "incremental": true
+    },
+    "include": ["src"],
+    "exclude": ["node_modules"]
+}
