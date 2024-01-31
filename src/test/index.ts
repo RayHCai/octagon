@@ -8,7 +8,7 @@ class User extends Model {
     greet() {
         console.log(
             `Hey! I'm ${this.name}${
-                this.age ? " and I'm " + this.age + ' years old' : ''
+                this.age ? ' and I\'m ' + this.age + ' years old' : ''
             }. You can reach me at ${this.email}.`
         );
     }
@@ -71,7 +71,7 @@ await user.delete();
 
 console.log((await User.filter({
     age: 19,
-})).length)
+})).length);
 
 // //! Updating a Row
 
@@ -90,13 +90,13 @@ doug.greet();
 // //! Advanced Filtering
 
 const adult = await User.filter(
-    ({age}: any) => age >= 18
+    ({ age }: any) => age >= 18
 );
 
 console.log(adult.length);
 
 const minor = await User.filter(
-    ({age}: any) => age < 18
+    ({ age }: any) => age < 18
 );
 
 console.log(minor.length);

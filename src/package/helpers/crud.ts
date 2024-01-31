@@ -2,8 +2,6 @@ import pg from 'pg';
 
 import Model from '../model.js';
 
-export async function createTable(name: string, columns: string[]) {}
-
 export function updateRow(
     this: Model,
     name: string,

@@ -1,18 +1,13 @@
 import pg from 'pg';
 
 import clientConfig from '../helpers/clientConfig.js';
-import { type FieldConfig, modelFields } from '../model.js';
 
-export type Field = {
-    fieldName: string;
-    fieldType?: ArrayElement<typeof modelFields>;
-    args?: FieldConfig;
-};
-
-export async function createModel(name: string, fields: Field[]) {
-    if (fields.filter((field) => field.fieldName === 'id').length === 0)
+export async function createModel(name: string, fields: Field<any>[]) {
+    if (fields.filter((field) => field.name === 'id').length === 0)
         fields.push({
-            fieldName: 'id',
+            name: 'id',
+            type: 'IntegerField',
+            config: null,
         });
 
     const client = new pg.Client(clientConfig);
@@ -25,56 +20,33 @@ export async function createModel(name: string, fields: Field[]) {
             name.toLowerCase()
         )} (${String(
             fields.map((field) => {
-                let args =
-                    field.args &&
-                    (field.args as any[])
-                        .map((node) => node.properties)
-                        .flat()
-                        .map((node) => {
-                            return {
-                                name: node.key.name,
-                                value: node.value.value,
-                            };
-                        });
+                let statement = `${field.name}`;
 
-                if (!args) args = [];
-
-                let optional =
-                    args.filter((a) => a.name === 'optional').length !== 0;
-
-                let defaultValue: any = args.filter(
-                    (a) => a.name === 'defaultValue'
-                );
-
-                if (defaultValue.length !== 0) defaultValue = defaultValue[0];
-                else defaultValue = null;
-
-                let statement = `${field.fieldName}`;
-
-                if (field.fieldName === 'id')
-                    statement += ` SERIAL PRIMARY KEY`;
-
-                if (field.fieldType === 'StringField') {
-                    let maxLength: any = args.filter(
-                        (a) => a.name === 'maxLength'
-                    );
-
-                    if (maxLength.length === 0) maxLength = 50;
-                    else maxLength = maxLength[0].value;
+                if (field.name === 'id') statement += ` SERIAL PRIMARY KEY`;
+                else if (field.type === 'StringField') {
+                    const maxLength: number =
+                        !field.config || !field.config!.maxLength
+                            ? 50
+                            : field.config!.maxLength!;
 
                     statement += ` VARCHAR(${maxLength})`;
                 }
+ else if (field.type === 'IntegerField')
+                    statement += ` INTEGER`;
 
-                if (field.fieldType === 'IntegerField') statement += ` INTEGER`;
+                if (field.config) {
+                    const defaultValue = field.config.defaultValue;
 
-                if (defaultValue)
-                    statement += ` DEFAULT ${
-                        typeof defaultValue.value === 'string'
-                            ? "'" + defaultValue.value + "'"
-                            : defaultValue.value
-                    }`;
+                    if (defaultValue)
+                        statement += ` DEFAULT ${
+                            typeof defaultValue === 'string'
+                                ? '\'' + defaultValue + '\''
+                                : defaultValue
+                        }`;
 
-                if (!optional) statement += ` NOT NULL`;
+                    const optional = field.config.optional;
+                    if (!optional) statement += ' NOT NULL';
+                }
 
                 return statement;
             })
