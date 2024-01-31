@@ -3,13 +3,6 @@ import pg from 'pg';
 import clientConfig from './helpers/clientConfig.js';
 import { updateRow } from './helpers/crud.js';
 
-export type FieldConfig = {
-    defaultValue?: any;
-    maxLength?: number;
-    optional?: boolean;
-    autoAdd?: boolean;
-} | null;
-
 function modelPropertiesToString(
     this: any,
     modelProperties: string[],
@@ -92,7 +85,7 @@ export default class Model {
                 updateRow.bind(this)(modelName, fields, `id = ${this.id}`)
             );
         }
- else {
+        else {
             // If this is the first item being added into the table
             // TODO: Assuming this is a number ID
             if (allRows.length === 0) this.id = 0;
@@ -200,13 +193,13 @@ export default class Model {
     }
 }
 
-export function IntegerField(config: FieldConfig = null) {
+export function IntegerField(config: FieldConfig<number> = null) {
     if (config?.optional) return null;
 
     return config?.defaultValue ? config.defaultValue : -1;
 }
 
-export function StringField(config: FieldConfig = null) {
+export function StringField(config: FieldConfig<string> = null) {
     return config?.defaultValue ? config.defaultValue : '';
 }
 

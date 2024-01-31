@@ -30,8 +30,7 @@ export async function createModel(name: string, fields: Field<any>[]) {
                             : field.config!.maxLength!;
 
                     statement += ` VARCHAR(${maxLength})`;
-                }
- else if (field.type === 'IntegerField')
+                } else if (field.type === 'IntegerField')
                     statement += ` INTEGER`;
 
                 if (field.config) {
@@ -40,7 +39,7 @@ export async function createModel(name: string, fields: Field<any>[]) {
                     if (defaultValue)
                         statement += ` DEFAULT ${
                             typeof defaultValue === 'string'
-                                ? '\'' + defaultValue + '\''
+                                ? "'" + defaultValue + "'"
                                 : defaultValue
                         }`;
 
@@ -53,7 +52,20 @@ export async function createModel(name: string, fields: Field<any>[]) {
         )})`,
     };
 
-    await client.query(query);
+    // await client.query(query);
 
     await client.end();
+
+    const migration: Migration = {
+        dependencies: [],
+        operations: [
+            {
+                type: 'create-model',
+                arguments: {
+                    modelName: name,
+                    fields: fields
+                }
+            }
+        ]
+    };
 }
