@@ -11,7 +11,8 @@ function argsToConfig<T>(args: acorn.Node[]) {
     const config: FieldConfig<T> = {};
 
     args.forEach(
-        arg => config[((arg as any).key.name as string)] = (arg as any).value.value
+        (arg) =>
+            (config[(arg as any).key.name as string] = (arg as any).value.value)
     );
 
     return config;
@@ -54,9 +55,13 @@ export default function parseModel(base: string, loc: string) {
 
                 const fieldName: string = node.key.name;
 
-                const args = node.value.arguments.length === 0 ? [] : node.value.arguments[0].properties;
-            
-                const config = args.length === 0 ? null : argsToConfig<FieldType>(args);
+                const args =
+                    node.value.arguments.length === 0
+                        ? []
+                        : node.value.arguments[0].properties;
+
+                const config =
+                    args.length === 0 ? null : argsToConfig<FieldType>(args);
 
                 const field: Field<FieldType> = {
                     name: fieldName,
@@ -69,7 +74,7 @@ export default function parseModel(base: string, loc: string) {
         }
     });
 
-    if(!modelName) return;
+    if (!modelName) return;
 
     createModel(modelName, fields);
 }
