@@ -91,7 +91,8 @@ export default class Model {
             await client.query(
                 updateRow.bind(this)(modelName, fields, `id = ${this.id}`)
             );
-        } else {
+        }
+ else {
             // If this is the first item being added into the table
             // TODO: Assuming this is a number ID
             if (allRows.length === 0) this.id = 0;
@@ -182,7 +183,7 @@ export default class Model {
     async update(obj: any) {
         const modelName = this.constructor.name;
         const fields = await this._getFields();
-        for(let k in obj) {
+        for(const k in obj) {
             if(!fields.includes(k)) throw Error('Error. Only fields in the model can be updated.');
         }
 
@@ -210,3 +211,8 @@ export function StringField(config: FieldConfig = null) {
 }
 
 export const modelFields = ['StringField', 'IntegerField'];
+
+export const FieldTypes: Dictionary = {
+    IntegerField: -1,
+    StringField: ''
+};

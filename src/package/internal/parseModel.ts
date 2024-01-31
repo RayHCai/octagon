@@ -4,52 +4,74 @@ import path from 'path';
 import * as acorn from 'acorn';
 import * as walk from 'acorn-walk';
 
-import { createModel, Field } from './modelCreation.js';
-import { modelFields } from '../model.js';
+import { createModel } from './modelCreation.js';
+import { modelFields, FieldTypes } from '../model.js';
 
-const fileContent = String(
-    fs.readFileSync(path.join('./src', '../lib/test/index.js'))
-);
+function argsToConfig<T>(args: acorn.Node[]) {
+    const config: FieldConfig<T> = {};
 
-const parsed = acorn.parse(fileContent, {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    locations: true,
-    ranges: true,
-});
+    args.forEach(
+        arg => config[((arg as any).key.name as string)] = (arg as any).value.value
+    );
 
-let modelName = '';
-const fields: Field[] = [];
+    return config;
+}
 
-walk.full(parsed, (node) => {
-    if (
-        node.type === 'ClassDeclaration' &&
-        (node as any).superClass &&
-        (node as any).superClass.name === 'Model'
-    )
-        modelName = (node as any).id.name;
+export default function parseModel(base: string, loc: string) {
+    const fileContent = String(fs.readFileSync(path.join(base, loc)));
 
-    if (node.type === 'ClassBody') {
-        if ((node as any).body.length === 0) return;
+    const parsed = acorn.parse(fileContent, {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        locations: true,
+        ranges: true,
+    });
 
-        const model: any = node;
+    let modelName;
+    const fields: Field<any>[] = [];
 
-        model.body.map((node: any) => {
-            if (node.type !== 'PropertyDefinition') return;
+    walk.full(parsed, (node) => {
+        if (
+            node.type === 'ClassDeclaration' &&
+            (node as any).superClass &&
+            (node as any).superClass.name === 'Model'
+        )
+            modelName = (node as any).id.name;
 
-            const fieldType = node.value.callee.name;
-            if (!modelFields.includes(fieldType)) return;
+        if (node.type === 'ClassBody') {
+            if ((node as any).body.length === 0) return;
 
-            const fieldName = node.key.name;
-            const args = node.value.arguments;
+            const model: any = node;
 
-            fields.push({
-                fieldType,
-                fieldName,
-                args,
+            model.body.map((node: any) => {
+                if (node.type !== 'PropertyDefinition') return;
+
+                const fieldType = node.value.callee.name;
+                if (!modelFields.includes(fieldType)) return;
+
+                const tempType = FieldTypes[fieldType];
+                type FieldType = typeof tempType;
+
+                const fieldName: string = node.key.name;
+
+                const args = node.value.arguments.length === 0 ? [] : node.value.arguments[0].properties;
+            
+                const config = args.length === 0 ? null : argsToConfig<FieldType>(args);
+
+                const field: Field<FieldType> = {
+                    name: fieldName,
+                    type: fieldType,
+                    config: config,
+                };
+
+                fields.push(field);
             });
-        });
-    }
-});
+        }
+    });
 
-createModel(modelName, fields);
+    if(!modelName) return;
+
+    createModel(modelName, fields);
+}
+
+parseModel('./src', '../lib/test/index.js');
