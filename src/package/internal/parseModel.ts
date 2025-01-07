@@ -3,6 +3,9 @@ import path from 'path';
 
 import * as acorn from 'acorn';
 import * as walk from 'acorn-walk';
+import pg from 'pg';
+
+import clientConfig from '../helpers/clientConfig.js';
 
 import { createModel } from './modelCreation.js';
 import { modelFields, FieldTypes } from '../model.js';
@@ -16,6 +19,24 @@ function argsToConfig<T>(args: acorn.Node[]) {
     );
 
     return config;
+}
+
+async function modelExists(modelName: string) {
+    const client = new pg.Client(clientConfig);
+
+    await client.connect();
+
+    const query = {
+        name: 'model-exists',
+        text: `SELECT * FROM pg_attribute WHERE table_name = '${pg.escapeIdentifier(modelName.toLowerCase())}'`,
+    };
+
+    const result = await client.query(query);
+
+    console.log(result);
+
+    await client.end();
+    // return result.rowCount > 0;
 }
 
 export default function parseModel(base: string, loc: string) {
@@ -75,6 +96,7 @@ export default function parseModel(base: string, loc: string) {
     });
 
     if (!modelName) return;
+    modelExists(modelName);
 
     createModel(modelName, fields);
 }
